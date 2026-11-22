@@ -841,18 +841,7 @@ function renderDailyTasks() {
       checkbox.addEventListener("change", () => {
         const current = getSaved(TASK_SELECTED_KEY, []);
 
-        if (checkbox.checked && current.length < 3) {
-          current.push(task.id);
-        }
-
-        saveTaskData(TASK_SELECTED_KEY, current);
-        renderDailyTasks();
-      });
-
-      label.appendChild(checkbox);
-      label.append(" " + task.name);
-      list.appendChild(label);
-    });
+      
   } else {
     list.textContent = "今日三項任務已選定。";
   }
