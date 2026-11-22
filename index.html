@@ -563,16 +563,19 @@ body {
             </div>
           </div>
 
-          <div class="info-panel">
-            <h2>Daily Goals</h2>
-            <div class="goal-number">2/5</div>
-            <div class="goal-track">
-              <div class="goal-fill"></div>
-            </div>
-            <div class="goal-caption">
-              <span>已完成</span>
-              <span>每日目標</span>
-            </div>
+         
+<div class="info-panel" onclick="showPage('daily-tasks')" style="cursor: pointer;">
+  <h2>Daily Goals</h2>
+  <div class="goal-number" id="daily-goal-progress">0/3</div>
+  <div class="goal-track">
+    <div class="goal-fill" id="daily-goal-fill"></div>
+  </div>
+  <div class="goal-caption">
+    <span>已完成</span>
+    <span>每日任務・點擊查看</span>
+  </div>
+</div>
+
           </div>
 
         </div>
