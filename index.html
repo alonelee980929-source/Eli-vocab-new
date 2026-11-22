@@ -577,10 +577,8 @@ body {
 </div>
 
         </div>
-        </div>
 
         <div class="function-grid">
-
 
 
           <button class="function-button" onclick="showPage('learning')">LEARN</button>
@@ -788,6 +786,7 @@ function resetDailyTasksIfNeeded() {
   if (localStorage.getItem(TASK_DATE_KEY) !== getToday()) {
     localStorage.setItem(TASK_DATE_KEY, getToday());
     saveTaskData(TASK_SELECTED_KEY, []);
+    saveTaskData(TASK_TODAY_DONE_KEY, []);
     localStorage.removeItem(TASK_FINISHED_KEY);
   }
 }
@@ -929,11 +928,7 @@ function renderDailyTasks() {
     list.appendChild(label);
   });
 
-  document.getElementById("task-selection-count").textContent =
-    selected.length + "/3";
-}
-
-document.addEventListener("DOMContentLoaded", renderDailyTasks);
+  document.addEventListener("DOMContentLoaded", renderDailyTasks);
 
   function showPage(pageId) {
   document.querySelectorAll('.page').forEach(function(page) {
