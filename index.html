@@ -608,6 +608,8 @@ body {
     <div id="available-task-list">
       <p>任務清單載入中...</p>
     </div>
+    <h3>今日選定任務</h3>
+<div id="selected-task-list"></div>
 
     <button onclick="showPage('home')">返回首頁</button>
   </div>
@@ -763,6 +765,7 @@ const taskPool = [
 const TASK_DONE_KEY = "eki-completed-tasks";
 const TASK_DATE_KEY = "eki-daily-date";
 const TASK_SELECTED_KEY = "eki-daily-selected";
+  const TASK_TODAY_DONE_KEY = "eki-daily-completed";
 const TASK_FINISHED_KEY = "eki-daily-finished";
 
 function getSaved(key, fallback) {
@@ -794,20 +797,109 @@ function renderDailyTasks() {
 
   const completed = getSaved(TASK_DONE_KEY, []);
   const selected = getSaved(TASK_SELECTED_KEY, []);
+  const todayDone = getSaved(TASK_TODAY_DONE_KEY, []);
+
   const list = document.getElementById("available-task-list");
+  const selectedList = document.getElementById("selected-task-list");
 
-  if (!list) return;
+  if (!list || !selectedList) return;
 
-  const available = taskPool.filter(task =>
-    !completed.includes(task.id)
-  );
+  // 更新進度
+  const progress = Math.min(todayDone.length, 3);
 
+  document.getElementById("task-selection-count").textContent =
+    progress + "/3";
+
+  const homeProgress = document.getElementById("daily-goal-progress");
+  const homeFill = document.getElementById("daily-goal-fill");
+
+  if (homeProgress) homeProgress.textContent = progress + "/3";
+  if (homeFill) homeFill.style.width = (progress / 3 * 100) + "%";
+
+  const status = document.getElementById("task-access-status");
+
+  if (status) {
+    status.textContent = progress === 3
+      ? "今日任務已完成！"
+      : "完成三項任務，即可解鎖網站所有功能。";
+  }
+
+  // 顯示尚未永久完成的任務
   list.innerHTML = "";
 
-  if (available.length === 0) {
-    list.innerHTML = "<p>所有任務都完成了！</p>";
-    return;
+  const available = taskPool.filter(task =>
+    !completed.includes(task.id) && !selected.includes(task.id)
+  );
+
+  if (selected.length < 3) {
+    available.forEach(task => {
+      const label = document.createElement("label");
+      label.style.display = "block";
+      label.style.padding = "12px 0";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.addEventListener("change", () => {
+        const current = getSaved(TASK_SELECTED_KEY, []);
+
+        if (checkbox.checked && current.length < 3) {
+          current.push(task.id);
+        }
+
+        saveTaskData(TASK_SELECTED_KEY, current);
+        renderDailyTasks();
+      });
+
+      label.appendChild(checkbox);
+      label.append(" " + task.name);
+      list.appendChild(label);
+    });
+  } else {
+    list.textContent = "今日三項任務已選定。";
   }
+
+  // 顯示今日選定任務及完成按鈕
+  selectedList.innerHTML = "";
+
+  selected.forEach(id => {
+    const task = taskPool.find(item => item.id === id);
+    if (!task) return;
+
+    const label = document.createElement("label");
+    label.style.display = "block";
+    label.style.padding = "12px 0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = todayDone.includes(id);
+    checkbox.disabled = checkbox.checked || progress >= 3;
+
+    checkbox.addEventListener("change", () => {
+      const current = getSaved(TASK_TODAY_DONE_KEY, []);
+
+      if (checkbox.checked && !current.includes(id)) {
+        current.push(id);
+        saveTaskData(TASK_TODAY_DONE_KEY, current);
+
+        if (current.length === 3) {
+          const allCompleted = getSaved(TASK_DONE_KEY, []);
+          selected.forEach(taskId => {
+            if (!allCompleted.includes(taskId)) {
+              allCompleted.push(taskId);
+            }
+          });
+          saveTaskData(TASK_DONE_KEY, allCompleted);
+        }
+      }
+
+      renderDailyTasks();
+    });
+
+    label.appendChild(checkbox);
+    label.append(" " + task.name);
+    selectedList.appendChild(label);
+  });
+}
 
   available.forEach(task => {
     const label = document.createElement("label");
