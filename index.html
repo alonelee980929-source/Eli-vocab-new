@@ -903,34 +903,6 @@ function renderDailyTasks() {
   });
 }
 
-  available.forEach(task => {
-    const label = document.createElement("label");
-    label.style.display = "block";
-    label.style.padding = "12px 0";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = selected.includes(task.id);
-    checkbox.disabled = selected.length >= 3 && !checkbox.checked;
-
-    checkbox.addEventListener("change", () => {
-      let current = getSaved(TASK_SELECTED_KEY, []);
-
-      if (checkbox.checked && current.length < 3) {
-        current.push(task.id);
-      } else {
-        current = current.filter(id => id !== task.id);
-      }
-
-      saveTaskData(TASK_SELECTED_KEY, current);
-      renderDailyTasks();
-    });
-
-    label.appendChild(checkbox);
-    label.append(" " + task.name);
-    list.appendChild(label);
-  });
-
   document.addEventListener("DOMContentLoaded", renderDailyTasks);
 
   function showPage(pageId) {
