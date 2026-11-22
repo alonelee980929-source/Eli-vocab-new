@@ -664,7 +664,66 @@ body {
 </nav>
 
 <script>
-function showPage(pageId) {
+// ===== Daily 一言 =====
+const dailyQuotes = [
+  { en: "Run your own race.", zh: "跑出屬於自己的步調。" },
+  { en: "Small steps every day.", zh: "每天都前進一小步。" },
+  { en: "Keep moving forward.", zh: "持續向前，不要停下。" },
+  { en: "Trust your own pace.", zh: "相信自己的步調。" },
+  { en: "Every step matters.", zh: "每一步都有意義。" },
+  { en: "Make today count.", zh: "讓今天有所收穫。" },
+  { en: "Progress takes patience.", zh: "進步需要耐心。" },
+  { en: "継続は力なり。", zh: "持續努力，就是力量。" },
+  { en: "一歩ずつ、前へ。", zh: "一步一步，繼續向前。" },
+  { en: "自分のペースで。", zh: "按照自己的步調前進。" },
+  { en: "今日の努力は明日の力。", zh: "今天的努力，成為明天的力量。" },
+  { en: "焦らず、一歩ずつ。", zh: "不必著急，一步一步來。" }
+];
+
+function updateDailyQuote() {
+  const today = new Date().toLocaleDateString();
+  const dateKey = "eki-quote-date";
+  const indexKey = "eki-quote-index";
+
+  let savedDate = "";
+  let index = -1;
+
+  try {
+    savedDate = localStorage.getItem(dateKey);
+    index = Number(localStorage.getItem(indexKey));
+  } catch (e) {}
+
+  if (savedDate !== today || !Number.isInteger(index) ||
+      index < 0 || index >= dailyQuotes.length) {
+    const previousIndex = index;
+
+    do {
+      index = Math.floor(Math.random() * dailyQuotes.length);
+    } while (index === previousIndex && dailyQuotes.length > 1);
+
+    try {
+      localStorage.setItem(dateKey, today);
+      localStorage.setItem(indexKey, String(index));
+    } catch (e) {}
+  }
+
+  const quote = dailyQuotes[index];
+
+  const original = document.getElementById("daily-quote");
+  const translation = document.getElementById("daily-quote-translation");
+
+  if (original) original.textContent = quote.en;
+  if (translation) translation.textContent = quote.zh;
+}
+
+// 每分鐘檢查所在地日期，跨日就更新
+function checkDailyQuote() {
+  updateDailyQuote();
+  setTimeout(checkDailyQuote, 60000);
+}
+
+document.addEventListener("DOMContentLoaded", checkDailyQuote);
+  function showPage(pageId) {
   document.querySelectorAll('.page').forEach(function(page) {
     page.classList.remove('active');
   });
