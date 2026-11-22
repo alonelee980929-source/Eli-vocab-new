@@ -743,6 +743,105 @@ function checkDailyQuote() {
 }
 
 document.addEventListener("DOMContentLoaded", checkDailyQuote);
+  
+// ===== 每日任務系統 =====
+
+const taskPool = [
+  { id: "kana-a", name: "五十音：あ行" },
+  { id: "kana-ka", name: "五十音：か行" },
+  { id: "kana-sa", name: "五十音：さ行" },
+  { id: "kana-ta", name: "五十音：た行" },
+  { id: "kana-na", name: "五十音：な行" },
+  { id: "kana-ha", name: "五十音：は行" },
+  { id: "kana-ma", name: "五十音：ま行" },
+  { id: "kana-ya", name: "五十音：や行" },
+  { id: "kana-ra", name: "五十音：ら行" },
+  { id: "kana-wa", name: "五十音：わ行" }
+];
+
+const TASK_DONE_KEY = "eki-completed-tasks";
+const TASK_DATE_KEY = "eki-daily-date";
+const TASK_SELECTED_KEY = "eki-daily-selected";
+const TASK_FINISHED_KEY = "eki-daily-finished";
+
+function getSaved(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function saveTaskData(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getToday() {
+  return new Date().toLocaleDateString();
+}
+
+function resetDailyTasksIfNeeded() {
+  if (localStorage.getItem(TASK_DATE_KEY) !== getToday()) {
+    localStorage.setItem(TASK_DATE_KEY, getToday());
+    saveTaskData(TASK_SELECTED_KEY, []);
+    localStorage.removeItem(TASK_FINISHED_KEY);
+  }
+}
+
+function renderDailyTasks() {
+  resetDailyTasksIfNeeded();
+
+  const completed = getSaved(TASK_DONE_KEY, []);
+  const selected = getSaved(TASK_SELECTED_KEY, []);
+  const list = document.getElementById("available-task-list");
+
+  if (!list) return;
+
+  const available = taskPool.filter(task =>
+    !completed.includes(task.id)
+  );
+
+  list.innerHTML = "";
+
+  if (available.length === 0) {
+    list.innerHTML = "<p>所有任務都完成了！</p>";
+    return;
+  }
+
+  available.forEach(task => {
+    const label = document.createElement("label");
+    label.style.display = "block";
+    label.style.padding = "12px 0";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = selected.includes(task.id);
+    checkbox.disabled = selected.length >= 3 && !checkbox.checked;
+
+    checkbox.addEventListener("change", () => {
+      let current = getSaved(TASK_SELECTED_KEY, []);
+
+      if (checkbox.checked && current.length < 3) {
+        current.push(task.id);
+      } else {
+        current = current.filter(id => id !== task.id);
+      }
+
+      saveTaskData(TASK_SELECTED_KEY, current);
+      renderDailyTasks();
+    });
+
+    label.appendChild(checkbox);
+    label.append(" " + task.name);
+    list.appendChild(label);
+  });
+
+  document.getElementById("task-selection-count").textContent =
+    selected.length + "/3";
+}
+
+document.addEventListener("DOMContentLoaded", renderDailyTasks);
+
   function showPage(pageId) {
   document.querySelectorAll('.page').forEach(function(page) {
     page.classList.remove('active');
