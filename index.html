@@ -823,6 +823,7 @@ function renderDailyTasks() {
       : "完成三項任務，即可解鎖網站所有功能。";
   }
 
+ 
   // 顯示尚未永久完成的任務
   list.innerHTML = "";
 
@@ -838,16 +839,29 @@ function renderDailyTasks() {
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
+
       checkbox.addEventListener("change", () => {
         const current = getSaved(TASK_SELECTED_KEY, []);
 
-      
+        if (checkbox.checked && current.length < 3) {
+          current.push(task.id);
+        }
+
+        saveTaskData(TASK_SELECTED_KEY, current);
+        renderDailyTasks();
+      });
+
+      label.appendChild(checkbox);
+      label.append(" " + task.name);
+      list.appendChild(label);
+    });
   } else {
     list.textContent = "今日三項任務已選定。";
   }
 
   // 顯示今日選定任務及完成按鈕
   selectedList.innerHTML = "";
+
 
   selected.forEach(id => {
     const task = taskPool.find(item => item.id === id);
